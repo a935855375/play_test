@@ -1,0 +1,47 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+GET         /                            controllers.HomeController.index
+
+# Generating verifycode
+GET         /verifyCode                  controllers.Application.verifyCode
+
+# Login page
+GET         /login                       controllers.Application.login
+
+# Handing login action
+POST        /login                       controllers.Application.doLogin
+
+# Login page
+GET         /register                    controllers.Application.register
+
+# Handing register action
+POST        /register                    controllers.Application.doRegister
+
+# Sending mail to sb. test
+GET         /mail                        controllers.Application.mailTest
+
+GET         /test                        controllers.Application.test
+
+POST        /test                        controllers.Application.doTest
+
+# Computers list (look at the default values for pagination parameters)
+GET         /computers                   controllers.HomeController.list(p:Int ?= 0, s:Int ?= 2, f ?= "")
+
+# Add computer
+GET         /computers/new               controllers.HomeController.create
+POST        /computers                   controllers.HomeController.save
+
+# Edit existing computer
+GET         /computers/:id               controllers.HomeController.edit(id:Long)
+POST        /computers/:id               controllers.HomeController.update(id:Long)
+
+# Delete a computer
+POST        /computers/:id/delete        controllers.HomeController.delete(id:Long)
+
+# Map static resources from the /public folder to the /assets URL path
+GET         /assets/*file                controllers.Assets.at(path="/public", file)
+
+GET         /*all                        controllers.Application.notFound(all: String)
+

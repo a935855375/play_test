@@ -1,0 +1,60 @@
+@(content: Html)(implicit request: MessagesRequestHeader)
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>PlayScala中文社区</title>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link rel="stylesheet" href="@routes.Assets.at("css/font.css")">
+        <link rel="stylesheet" href="@routes.Assets.at("layui/css/layui.css")">
+        <link rel="stylesheet" href="@routes.Assets.at("css/global.css")">
+        <link rel="shortcut icon" href="@routes.Assets.at("favicon.ico")"/>
+
+    </head>
+
+    <body>
+        <div class="header">
+            <a class="logo" href="/" title="Fly" style="width: 220px;
+                height: 40px;
+                background: url(@routes.Assets.at("images/logo.png")) no-repeat;
+            ">PlayScala中文社区&amp;论坛</a>
+
+            <div class="nav">
+                <a class='' href="/docs">
+                    <i class="iconfont icon-iconmingxinganli" style="top: 2px;"></i>学习
+                </a>
+                <a class='' href="/articles">
+                    <i class="iconfont icon-logo" style="top: 2px;"></i>分享
+                </a>
+                <a class='' href="/qas">
+                    <i class="iconfont icon-wenda" style="top: 2px;"></i>问答
+                </a>
+                <a class='' href="/tweets">
+                    <i class="layui-icon" style="top: 2px;">&#xe60c;</i>说说
+                </a>
+                <a href="https://github.com/playcommunity/play-community" target="_blank">
+                    <i class="iconfont icon-daima" style="top: 2px;"></i>源码
+                </a>
+            </div>
+
+        </div>
+
+        @content
+
+        <div class="footer">
+            <p> 2017 &copy; <a href="http://www.playscala.cn">PlayScala社区</a></p>
+                <!--<p>
+        <a href="https://www.chatbot.cn/demo.html" target="_blank">产品演示</a>
+        <a href="https://cloud.smartnlp.cn/cloud/register" target="_blank">产品体验</a>
+        <a href="javascript:void(0);" target="_blank">微信公众号</a>
+    </p>-->
+        </div>
+        <script src="/assets/js/jquery.js"></script>
+        <script src="/assets/layui/layui.js"></script>
+        <script src="/assets/js/vue.js"></script>
+    </body>
+
+
+</html>

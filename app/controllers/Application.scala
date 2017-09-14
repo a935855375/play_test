@@ -1,0 +1,106 @@
+package controllers
+
+import java.io.ByteArrayOutputStream
+import javax.inject.Inject
+
+import akka.util.ByteString
+import models.UserRepository
+import play.api.data.Form
+import play.api.data.Forms._
+import play.api.mvc._
+import service.MailerService
+import utils.{HashUtil, VerifyCodeUtils}
+import views.html
+
+import scala.concurrent.{ExecutionContext, Future}
+
+class Application @Inject()(cc: MessagesControllerComponents, users: UserRepository, mailer: MailerService)
+                           (implicit ec: ExecutionContext) extends MessagesAbstractController(cc) {
+
+  //private val logger = play.api.Logger(this.getClass)
+
+  def verifyCode() = Action { implicit request: Request[AnyContent] =>
+    val verifyCode = VerifyCodeUtils.generateVerifyCode(4)
+    val out: ByteArrayOutputStream = new ByteArrayOutputStream
+    VerifyCodeUtils.outputImage(200, 80, out, verifyCode)
+    Ok(ByteString(out.toByteArray))
+      .as("image/jpeg")
+      .addingToSession("verifyCode" -> HashUtil.sha256(verifyCode.toLowerCase()))
+  }
+
+  def test(): Action[AnyContent] = Action.async { implicit request =>
+    Future {
+      Ok(html.codetest())
+    }
+  }
+
+  def doTest(): Action[AnyContent] = Action.async { implicit request =>
+    Form(single("code" -> nonEmptyText)).bindFromRequest().fold(
+      _ => Future(Ok("验证码错误")),
+      single => if (HashUtil.sha256(single.toLowerCase()) == request.session.get("verifyCode").getOrElse(""))
+        Future(Ok("验证码正确"))
+      else
+        Future(Ok("验证码错误2"))
+    )
+  }
+
+  def login: Action[AnyContent] = Action.async { implicit request =>
+    Future(Ok(views.html.login()))
+  }
+
+  def doLogin(): Action[AnyContent] = Action.async { implicit request =>
+    Form(tuple("mail" -> nonEmptyText, "password" -> nonEmptyText, "verifyCode" -> nonEmptyText)).bindFromRequest().fold(
+      _ => Future(Ok("请输入账号和密码")),
+      tuple => {
+        val (mail, password, verifyCode) = tuple
+        if (HashUtil.sha256(verifyCode.toLowerCase()) == request.session.get("verifyCode").getOrElse("")) {
+          if (password.equals(mail))
+            Future(Ok("登录成功"))
+          else
+            Future(Ok("用户名或密码错误"))
+        } else {
+          Future(Ok("验证码输入错误"))
+        }
+      }
+    )
+  }
+
+  def register: Action[AnyContent] = Action.async { implicit request =>
+    Future(Ok(views.html.register()))
+  }
+
+  def doRegister(): Action[AnyContent] = Action.async { implicit request =>
+    //logger.info(request.body.asFormUrlEncoded.get.toString())
+    Form(tuple("mail" -> nonEmptyText, "name" -> nonEmptyText, "password" ->
+      nonEmptyText, "repassword" -> nonEmptyText, "verifyCode" -> nonEmptyText)).bindFromRequest().fold(
+      _ => Future(Ok("注册出错了,您的填写有误hah！")),
+      tuple => {
+        val (mail, name, password, repassword, verifyCode) = tuple
+        if (HashUtil.sha256(verifyCode.toLowerCase()) == request.session.get("verifyCode").getOrElse("")) {
+          users.check(mail).flatMap {
+            case Some(_) => Future(Ok("注册出错了，您已经注册过了！"))
+            case None =>
+              if (password == repassword) {
+
+              }
+              Future(Ok("注册成功！"))
+          }
+        } else {
+          Future(Ok("操作出错了！,验证码输入错误！"))
+        }
+      }
+    )
+  }
+
+  def mailTest: Action[AnyContent] = Action.async { implicit request =>
+    Future {
+      mailer.sendEmail("笨蛋", "1060238139@qq.com", views.html.mail.activeMail("笨蛋", "1234").body)
+      Ok("hello")
+    }
+  }
+
+  def notFound(all: String): Action[AnyContent] = Action.async { implicit request =>
+    Future(Ok(views.html.notFound()))
+  }
+
+}
