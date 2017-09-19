@@ -3,10 +3,14 @@ package controllers
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
+import actors.QuizActor
+import akka.actor.ActorSystem
+import akka.stream.Materializer
 import akka.util.ByteString
 import models.UserRepository
 import play.api.data.Form
 import play.api.data.Forms._
+import play.api.libs.streams.ActorFlow
 import play.api.mvc._
 import service.MailerService
 import utils.{HashUtil, VerifyCodeUtils}
@@ -15,9 +19,9 @@ import views.html
 import scala.concurrent.{ExecutionContext, Future}
 
 class Application @Inject()(cc: MessagesControllerComponents, users: UserRepository, mailer: MailerService)
-                           (implicit ec: ExecutionContext) extends MessagesAbstractController(cc) {
+                           (implicit ec: ExecutionContext, system: ActorSystem, mat: Materializer) extends MessagesAbstractController(cc) {
 
-  //private val logger = play.api.Logger(this.getClass)
+  //private lazy val logger = play.api.Logger(this.getClass)
 
   def verifyCode() = Action { implicit request: Request[AnyContent] =>
     val verifyCode = VerifyCodeUtils.generateVerifyCode(4)
@@ -73,7 +77,7 @@ class Application @Inject()(cc: MessagesControllerComponents, users: UserReposit
     //logger.info(request.body.asFormUrlEncoded.get.toString())
     Form(tuple("mail" -> nonEmptyText, "name" -> nonEmptyText, "password" ->
       nonEmptyText, "repassword" -> nonEmptyText, "verifyCode" -> nonEmptyText)).bindFromRequest().fold(
-      _ => Future(Ok("注册出错了,您的填写有误hah！")),
+      _ => Future(Ok("注册出错了,您的填写有误！")),
       tuple => {
         val (mail, name, password, repassword, verifyCode) = tuple
         if (HashUtil.sha256(verifyCode.toLowerCase()) == request.session.get("verifyCode").getOrElse("")) {
@@ -100,7 +104,17 @@ class Application @Inject()(cc: MessagesControllerComponents, users: UserReposit
   }
 
   def notFound(all: String): Action[AnyContent] = Action.async { implicit request =>
-    Future(Ok(views.html.notFound()))
+    Future.successful(Ok(views.html.notFound()))
+  }
+
+  def socket: WebSocket = WebSocket.accept[String, String] { implicit request =>
+    ActorFlow.actorRef { out =>
+      QuizActor.props(out)
+    }
+  }
+
+  def echo: Action[AnyContent] = Action.async { implicit request =>
+    Future(Ok(views.html.echo()))
   }
 
 }

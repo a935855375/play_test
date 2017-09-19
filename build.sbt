@@ -10,6 +10,10 @@ libraryDependencies += guice
 libraryDependencies += jdbc
 libraryDependencies += evolutions
 
+libraryDependencies += "org.webjars" % "flot" % "0.8.3"
+libraryDependencies += "org.webjars" % "bootstrap" % "3.3.6"
+libraryDependencies += "org.webjars" % "jquery" % "1.11.1"
+
 libraryDependencies += "com.h2database" % "h2" % "1.4.194"
 
 libraryDependencies += "com.typesafe.play" %% "anorm" % "2.5.3"

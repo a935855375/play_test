@@ -22,6 +22,10 @@ POST        /register                    controllers.Application.doRegister
 # Sending mail to sb. test
 GET         /mail                        controllers.Application.mailTest
 
+GET         /socket                      controllers.Application.socket
+
+GET         /echo                        controllers.Application.echo
+
 GET         /test                        controllers.Application.test
 
 POST        /test                        controllers.Application.doTest
