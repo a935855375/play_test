@@ -33,64 +33,62 @@ class Application @Inject()(cc: MessagesControllerComponents, users: UserReposit
   }
 
   def test(): Action[AnyContent] = Action.async { implicit request =>
-    Future {
-      Ok(html.codetest())
-    }
+    Future.successful(Ok(html.codetest()))
   }
 
   def doTest(): Action[AnyContent] = Action.async { implicit request =>
     Form(single("code" -> nonEmptyText)).bindFromRequest().fold(
-      _ => Future(Ok("验证码错误")),
+      _ => Future.successful(Ok("验证码错误")),
       single => if (HashUtil.sha256(single.toLowerCase()) == request.session.get("verifyCode").getOrElse(""))
-        Future(Ok("验证码正确"))
+        Future.successful(Ok("验证码正确"))
       else
-        Future(Ok("验证码错误2"))
+        Future.successful(Ok("验证码错误2"))
     )
   }
 
   def login: Action[AnyContent] = Action.async { implicit request =>
-    Future(Ok(views.html.login()))
+    Future.successful(Ok(views.html.login()))
   }
 
   def doLogin(): Action[AnyContent] = Action.async { implicit request =>
     Form(tuple("mail" -> nonEmptyText, "password" -> nonEmptyText, "verifyCode" -> nonEmptyText)).bindFromRequest().fold(
-      _ => Future(Ok("请输入账号和密码")),
+      _ => Future.successful(Ok("请输入账号和密码")),
       tuple => {
         val (mail, password, verifyCode) = tuple
         if (HashUtil.sha256(verifyCode.toLowerCase()) == request.session.get("verifyCode").getOrElse("")) {
           if (password.equals(mail))
-            Future(Ok("登录成功"))
+            Future.successful(Ok("登录成功"))
           else
-            Future(Ok("用户名或密码错误"))
+            Future.successful(Ok("用户名或密码错误"))
         } else {
-          Future(Ok("验证码输入错误"))
+          Future.successful(Ok("验证码输入错误"))
         }
       }
     )
   }
 
   def register: Action[AnyContent] = Action.async { implicit request =>
-    Future(Ok(views.html.register()))
+    Future.successful(Ok(views.html.register()))
   }
 
   def doRegister(): Action[AnyContent] = Action.async { implicit request =>
     //logger.info(request.body.asFormUrlEncoded.get.toString())
     Form(tuple("mail" -> nonEmptyText, "name" -> nonEmptyText, "password" ->
       nonEmptyText, "repassword" -> nonEmptyText, "verifyCode" -> nonEmptyText)).bindFromRequest().fold(
-      _ => Future(Ok("注册出错了,您的填写有误！")),
+      _ => Future.successful(Ok("注册出错了,您的填写有误！")),
       tuple => {
         val (mail, name, password, repassword, verifyCode) = tuple
         if (HashUtil.sha256(verifyCode.toLowerCase()) == request.session.get("verifyCode").getOrElse("")) {
           users.check(mail).flatMap {
-            case Some(_) => Future(Ok("注册出错了，您已经注册过了！"))
+            case Some(_) => Future.successful(Ok("注册出错了，您已经注册过了！"))
             case None =>
               if (password == repassword) {
 
               }
-              Future(Ok("注册成功！"))
+              Future.successful(Ok("注册成功！"))
           }
         } else {
-          Future(Ok("操作出错了！,验证码输入错误！"))
+          Future.successful(Ok("操作出错了！,验证码输入错误！"))
         }
       }
     )
@@ -114,7 +112,7 @@ class Application @Inject()(cc: MessagesControllerComponents, users: UserReposit
   }
 
   def echo: Action[AnyContent] = Action.async { implicit request =>
-    Future(Ok(views.html.echo()))
+    Future.successful(Ok(views.html.echo()))
   }
 
 }
