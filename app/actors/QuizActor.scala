@@ -8,8 +8,7 @@ class QuizActor(out: ActorRef) extends Actor {
 
   override def receive: PartialFunction[Any, Unit] = {
     case s: String =>
-      logger.info("gg" + s)
-      out ! "echo:" + s
+      out ! "hello:" + s
   }
 }
 

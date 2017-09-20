@@ -25,7 +25,7 @@ class UserRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionConte
     }
   }
 
-  def check(mail: String) = Future {
+  def check(mail: String): Future[Option[RegisterUser]] = Future {
     db.withConnection { implicit connection =>
       SQL(
         """
@@ -33,9 +33,9 @@ class UserRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionConte
         """
       ).on('mail -> mail).as(simple singleOpt)
     }
-  }
+  }(ec)
 
-  def insert(user: RegisterUser) = Future {
+  def insert(user: RegisterUser): Future[Int] = Future {
     db.withConnection { implicit connection =>
       SQL(
         """
@@ -47,6 +47,6 @@ class UserRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionConte
         'password -> user.password
       ).executeUpdate()
     }
-  }
+  }(ec)
 
 }

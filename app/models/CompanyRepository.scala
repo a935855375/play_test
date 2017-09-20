@@ -16,19 +16,19 @@ class CompanyRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
   private val db = dbapi.database("default")
 
   /**
-   * Parse a Company from a ResultSet
-   */
+    * Parse a Company from a ResultSet
+    */
   private[models] val simple = {
     get[Option[Long]]("company.id") ~
       get[String]("company.name") map {
-      case id~name => Company(id, name)
+      case id ~ name => Company(id, name)
     }
   }
 
   /**
-   * Construct the Map[String,String] needed to fill a select options set.
-   */
-  def options: Future[Seq[(String,String)]] = Future(db.withConnection { implicit connection =>
+    * Construct the Map[String,String] needed to fill a select options set.
+    */
+  def options: Future[Seq[(String, String)]] = Future(db.withConnection { implicit connection =>
     SQL("select * from company order by name").as(simple *).
       foldLeft[Seq[(String, String)]](Nil) { (cs, c) =>
       c.id.fold(cs) { id => cs :+ (id.toString -> c.name) }
