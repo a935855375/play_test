@@ -10,6 +10,7 @@ import akka.util.ByteString
 import models.UserRepository
 import play.api.data.Form
 import play.api.data.Forms._
+import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.streams.ActorFlow
 import play.api.mvc._
 import play.libs.ws._
@@ -17,13 +18,13 @@ import service.MailerService
 import utils.{HashUtil, VerifyCodeUtils}
 import views.html
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class Application @Inject()(cc: MessagesControllerComponents,
                             users: UserRepository,
                             mailer: MailerService,
                             ws: WSClient)
-                           (implicit ec: ExecutionContext, system: ActorSystem, mat: Materializer) extends MessagesAbstractController(cc) {
+                           (implicit system: ActorSystem, mat: Materializer) extends MessagesAbstractController(cc) {
 
   //private lazy val logger = play.api.Logger(this.getClass)
 
