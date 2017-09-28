@@ -1,7 +1,7 @@
 package controllers
 
 import java.io.ByteArrayOutputStream
-import javax.inject.Inject
+import javax.inject._
 
 import actors.QuizActor
 import akka.actor.ActorSystem
@@ -10,7 +10,6 @@ import akka.util.ByteString
 import models.UserRepository
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.streams.ActorFlow
 import play.api.mvc._
 import play.libs.ws._
@@ -18,15 +17,18 @@ import service.MailerService
 import utils.{HashUtil, VerifyCodeUtils}
 import views.html
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class Application @Inject()(cc: MessagesControllerComponents,
                             users: UserRepository,
                             mailer: MailerService,
                             ws: WSClient)
-                           (implicit system: ActorSystem, mat: Materializer) extends MessagesAbstractController(cc) {
+                           (implicit ec: ExecutionContext, system: ActorSystem, mat: Materializer) extends MessagesAbstractController(cc) {
 
-  //private lazy val logger = play.api.Logger(this.getClass)
+  private lazy val logger = play.api.Logger(this.getClass)
+
+  var count = 0
 
   def verifyCode() = Action { implicit request: Request[AnyContent] =>
     val verifyCode = VerifyCodeUtils.generateVerifyCode(4)
@@ -60,6 +62,7 @@ class Application @Inject()(cc: MessagesControllerComponents,
       _ => Future.successful(Ok("请输入账号和密码")),
       tuple => {
         val (mail, password, verifyCode) = tuple
+        logger.error(mail + " " + password + " " + verifyCode)
         if (HashUtil.sha256(verifyCode.toLowerCase()) == request.session.get("verifyCode").getOrElse("")) {
           if (password.equals(mail))
             Future.successful(Ok("登录成功"))
@@ -112,12 +115,17 @@ class Application @Inject()(cc: MessagesControllerComponents,
 
   def socket: WebSocket = WebSocket.accept[String, String] { implicit request =>
     ActorFlow.actorRef { out =>
-      QuizActor.props(out)
+      count = count + 1
+      QuizActor.props(out, "用户" + count)
     }
   }
 
   def echo: Action[AnyContent] = Action.async { implicit request =>
     Future.successful(Ok(views.html.echo()))
+  }
+
+  def homework: Action[AnyContent] = Action.async { implicit request =>
+    Future.successful(Ok(views.html.homework()))
   }
 
 }

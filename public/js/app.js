@@ -6,6 +6,12 @@ $(document).ready(function () {
         return;
     }
 
+    var getScriptParamUrl = function () {
+        var scripts = document.getElementsByTagName('script');
+        var lastScript = scripts[scripts.length - 1];
+        return lastScript.getAttribute('data-url');
+    };
+
     var send = function () {
         var text = $message.val();
         $message.val("");
@@ -15,7 +21,7 @@ $(document).ready(function () {
 
     var $messages = $("#messages"), $send = $("#send"), $message = $("#message");
 
-    var connection = new WebSocket("ws://localhost:9000/socket");
+    var connection = new WebSocket(getScriptParamUrl());
 
     $send.prop("disabled", true);
 
@@ -40,6 +46,12 @@ $(document).ready(function () {
         console.log('receive a message', event.data);
         $messages.append($("<li style='font-size: 1.5em'>" + event.data + "</li>"))
     };
+
+    var ping = function () {
+        connection.send("ping-pong")
+    };
+
+    window.setInterval(ping, 1000 * 5);
 
     console.log("chat app is running!");
 });
