@@ -16,8 +16,12 @@ POST        /login                       controllers.Application.doLogin
 # Login page
 GET         /register                    controllers.Application.register
 
+POST        /validusername               controllers.Application.validUsername
+
 # Handing register action
 POST        /register                    controllers.Application.doRegister
+
+POST        /valid                       controllers.Application.validLogin
 
 # Sending mail to sb. test
 GET         /mail                        controllers.Application.mailTest
@@ -27,10 +31,6 @@ GET         /homework                    controllers.Application.homework
 GET         /socket                      controllers.Application.socket
 
 GET         /echo                        controllers.Application.echo
-
-GET         /test                        controllers.Application.test
-
-POST        /test                        controllers.Application.doTest
 
 # Computers list (look at the default values for pagination parameters)
 GET         /computers                   controllers.HomeController.list(p:Int ?= 0, s:Int ?= 2, f ?= "")

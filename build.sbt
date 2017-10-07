@@ -8,8 +8,10 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 libraryDependencies += guice
 libraryDependencies += jdbc
-libraryDependencies += evolutions
 libraryDependencies += ws
+libraryDependencies += ehcache
+libraryDependencies += jcache
+libraryDependencies += "org.jsr107.ri" % "cache-annotations-ri-guice" % "1.0.0"
 
 libraryDependencies += "org.webjars" % "flot" % "0.8.3"
 libraryDependencies += "org.webjars" % "bootstrap" % "3.3.6"

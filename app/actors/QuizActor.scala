@@ -15,9 +15,8 @@ class QuizActor(out: ActorRef, val name: String) extends Actor {
     case message: String => actor ! UserMessage(name, message)
   }
 
-  override def postStop(): Unit = {
-    actor ! ExitMessage(name)
-  }
+  override def postStop(): Unit = actor ! ExitMessage(name)
+
 }
 
 object QuizActor {

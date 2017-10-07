@@ -1,6 +1,6 @@
 package models
 
-import javax.inject.Inject
+import javax.inject._
 
 import anorm.SqlParser._
 import anorm._
@@ -8,30 +8,30 @@ import play.api.db.DBApi
 
 import scala.concurrent.Future
 
-case class RegisterUser(mail: String,
-                        name: String,
+case class RegisterUser(username: String,
+                        nickname: String,
                         password: String)
 
-@javax.inject.Singleton
+@Singleton
 class UserRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
 
   private val db = dbapi.database("default")
 
   private val simple = {
-    get[String]("mail") ~
-      get[String]("name") ~
+    get[String]("username") ~
+      get[String]("nickname") ~
       get[String]("password") map {
-      case mail ~ name ~ password => RegisterUser(mail, name, password)
+      case username ~ nickname ~ password => RegisterUser(username, nickname, password)
     }
   }
 
-  def check(mail: String): Future[Option[RegisterUser]] = Future {
+  def check(username: String): Future[Option[RegisterUser]] = Future {
     db.withConnection { implicit connection =>
       SQL(
         """
-           select * from user where mail = {mail}
+           select * from user where username = {mail}
         """
-      ).on('mail -> mail).as(simple singleOpt)
+      ).on('mail -> username).as(simple singleOpt)
     }
   }(ec)
 
@@ -39,11 +39,11 @@ class UserRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionConte
     db.withConnection { implicit connection =>
       SQL(
         """
-          insert into user(mail,name,password) values({mail},{name},{password})
+          insert into user(username,nickname,password) values({username},{nickname},{password})
         """
       ).on(
-        'mail -> user.mail,
-        'name -> user.name,
+        'username -> user.username,
+        'nickname -> user.nickname,
         'password -> user.password
       ).executeUpdate()
     }
