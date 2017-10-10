@@ -101,7 +101,7 @@
                         success: function (data) {
                             var value = data.valid;
                             if (value == true)
-                                alert("登录成功");
+                                window.location.href="@routes.Application.echo()";
                             else {
                                 $password.val("");
                                 alert("登录失败，用户名或密码错误");

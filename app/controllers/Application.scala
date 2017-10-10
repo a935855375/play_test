@@ -42,8 +42,6 @@ class Application @Inject()(cc: MessagesControllerComponents,
     )(RegisterUser.apply)(RegisterUser.unapply)
   )
 
-  var count = 0
-
   def verifyCode() = Action { implicit request: Request[AnyContent] =>
     val verifyCode = VerifyCodeUtils.generateVerifyCode(4)
     val out: ByteArrayOutputStream = new ByteArrayOutputStream
@@ -86,7 +84,7 @@ class Application @Inject()(cc: MessagesControllerComponents,
     val password = (request.body \ "password").get.as[String]
     users.check(username).flatMap {
       case Some(user) => if (user.password.equals(password))
-        Future.successful(Ok(Json.toJson(Valid(true))).as(JSON))
+        Future.successful(Ok(Json.toJson(Valid(true))).as(JSON).withSession("username" -> user.username))
       else
         Future.successful(Ok(Json.toJson(Valid(false))).as(JSON))
       case None => Future.successful(Ok(Json.toJson(Valid(false))).as(JSON))
@@ -101,7 +99,7 @@ class Application @Inject()(cc: MessagesControllerComponents,
     userForm.bindFromRequest().fold(
       _ => Future.successful(BadRequest),
       user => users.insert(user).flatMap {
-        case x: Int if x != 0 => Future.successful(Ok("恭喜你注册成功"))
+        case x: Int if x != 0 => Future.successful(Redirect(routes.Application.echo()).withSession("username" -> user.username))
         case _ => Future.successful(Ok("恭喜你注册失败了"))
       }
     )
@@ -120,15 +118,21 @@ class Application @Inject()(cc: MessagesControllerComponents,
     }
   }
 
-  def socket: WebSocket = WebSocket.accept[String, String] { implicit request =>
-    ActorFlow.actorRef { out =>
-      count = count + 1
-      QuizActor.props(out, "用户" + count)
+  def socket: WebSocket = WebSocket.acceptOrResult[String, String] { implicit request =>
+    request.session.get("username") match {
+      case Some(username) => users.check(username).map {
+        case Some(user) => Right(ActorFlow.actorRef(out => QuizActor.props(out, user.nickname)))
+        case None => Left(BadRequest)
+      }
+      case None => Future.successful(Left(BadRequest))
     }
   }
 
   def echo: Action[AnyContent] = Action.async { implicit request =>
-    Future.successful(Ok(views.html.echo()))
+    request.session.get("username") match {
+      case Some(_) => Future.successful(Ok(views.html.echo()))
+      case None => Future.successful(Redirect(routes.Application.login()))
+    }
   }
 
   def homework: EssentialAction = cached("homework") {
@@ -138,46 +142,3 @@ class Application @Inject()(cc: MessagesControllerComponents,
   }
 
 }
-
-
-/*def doRegister(): Action[AnyContent] = Action.async { implicit request =>
-  //logger.info(request.body.asFormUrlEncoded.get.toString())
-  Form(tuple("mail" -> nonEmptyText, "name" -> nonEmptyText, "password" ->
-    nonEmptyText, "repassword" -> nonEmptyText, "verifyCode" -> nonEmptyText)).bindFromRequest().fold(
-    _ => Future.successful(Ok("注册出错了,您的填写有误！")),
-    tuple => {
-      val (mail, name, password, repassword, verifyCode) = tuple
-      if (HashUtil.sha256(verifyCode.toLowerCase()) == request.session.get("verifyCode").getOrElse("")) {
-        users.check(mail).flatMap {
-          case Some(_) => Future.successful(Ok("注册出错了，您已经注册过了！"))
-          case None =>
-            if (password == repassword) {
-
-            }
-            Future.successful(Ok("注册成功！"))
-        }
-      } else {
-        Future.successful(Ok("操作出错了！,验证码输入错误！"))
-      }
-    }
-  )
-}*/
-
-
-/*def doLogin(): Action[AnyContent] = Action.async { implicit request =>
-  Form(tuple("mail" -> nonEmptyText, "password" -> nonEmptyText, "verifyCode" -> nonEmptyText)).bindFromRequest().fold(
-    _ => Future.successful(Ok("请输入账号和密码")),
-    tuple => {
-      val (mail, password, verifyCode) = tuple
-      logger.error(mail + " " + password + " " + verifyCode)
-      if (HashUtil.sha256(verifyCode.toLowerCase()) == request.session.get("verifyCode").getOrElse("")) {
-        if (password.equals(mail))
-          Future.successful(Ok("登录成功"))
-        else
-          Future.successful(Ok("用户名或密码错误"))
-      } else {
-        Future.successful(Ok("验证码输入错误"))
-      }
-    }
-  )
-}*/
