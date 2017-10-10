@@ -2,7 +2,7 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET         /                            controllers.HomeController.index
+GET         /                            controllers.Application.echo
 
 # Generating verifycode
 GET         /verifyCode                  controllers.Application.verifyCode
@@ -29,22 +29,6 @@ GET         /mail                        controllers.Application.mailTest
 GET         /homework                    controllers.Application.homework
 
 GET         /socket                      controllers.Application.socket
-
-GET         /echo                        controllers.Application.echo
-
-# Computers list (look at the default values for pagination parameters)
-GET         /computers                   controllers.HomeController.list(p:Int ?= 0, s:Int ?= 2, f ?= "")
-
-# Add computer
-GET         /computers/new               controllers.HomeController.create
-POST        /computers                   controllers.HomeController.save
-
-# Edit existing computer
-GET         /computers/:id               controllers.HomeController.edit(id:Long)
-POST        /computers/:id               controllers.HomeController.update(id:Long)
-
-# Delete a computer
-POST        /computers/:id/delete        controllers.HomeController.delete(id:Long)
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                controllers.Assets.at(path="/public", file)

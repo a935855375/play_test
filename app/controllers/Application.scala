@@ -130,7 +130,7 @@ class Application @Inject()(cc: MessagesControllerComponents,
 
   def echo: Action[AnyContent] = Action.async { implicit request =>
     request.session.get("username") match {
-      case Some(_) => Future.successful(Ok(views.html.echo()))
+      case Some(_) => Future.successful(Ok(views.html.chatroom.echo()))
       case None => Future.successful(Redirect(routes.Application.login()))
     }
   }

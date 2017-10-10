@@ -1,5 +1,4 @@
 
-import controllers.HomeController
 import org.scalatest.concurrent.ScalaFutures
 import play.api.test._
 import play.api.test.Helpers._

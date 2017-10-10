@@ -1,4 +1,4 @@
-name := "play-scala-anorm-example"
+name := "simple chatroom"
 
 version := "2.6.0-SNAPSHOT"
 
