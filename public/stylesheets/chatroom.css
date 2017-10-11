@@ -1,0 +1,79 @@
+#header_area {
+    background: white;
+    padding: 0 15px;
+    display: table;
+    width: 100%;
+}
+
+.center_content {
+    margin: 0 auto;
+}
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    vertical-align: baseline;
+}
+
+article, aside, details, figcaption, figure, footer, header, hgroup, main, nav, section, summary {
+    display: block;
+}
+
+*, *:before, *:after {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.col-md-12,
+.container,
+.row {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+.logo {
+    width: 230px;
+    height: auto;
+}
+
+#logo {
+    color: #000000;
+    margin-left: 12px;
+    font-size: 46px;
+    font-family: "AR PL UMing TW MBE";
+}
+
+header {
+    min-height: 65px;
+    /*overflow:hidden;*/
+}
+
+ul, ol, li {
+    list-style: none;
+}
+
+.header_right {
+    padding-top: 15px;
+    padding-bottom: 15px;
+    /*overflow:hidden;*/
+}
+
+
+.header_right li {
+    cursor: pointer;
+    margin-left: 0px;
+    display: inline-block;
+    padding: 0 16px;
+
+    font-size: 23px;
+}
+
+.list-unstyled li {
+    background-color: transparent;
+}
+

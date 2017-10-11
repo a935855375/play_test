@@ -130,7 +130,11 @@ class Application @Inject()(cc: MessagesControllerComponents,
 
   def echo: Action[AnyContent] = Action.async { implicit request =>
     request.session.get("username") match {
-      case Some(_) => Future.successful(Ok(views.html.chatroom.echo()))
+      case Some(username) =>
+        users.check(username).flatMap {
+          case Some(user) => Future.successful(Ok(views.html.chatroom.echo(user.nickname)))
+          case None => Future.successful(Redirect(routes.Application.login()))
+        }
       case None => Future.successful(Redirect(routes.Application.login()))
     }
   }
@@ -139,6 +143,10 @@ class Application @Inject()(cc: MessagesControllerComponents,
     Action.async { implicit request =>
       Future.successful(Ok(views.html.homework()))
     }
+  }
+
+  def exit: Action[AnyContent] = Action.async { implicit request =>
+    Future.successful(Redirect(routes.Application.login()).removingFromSession("username"))
   }
 
 }

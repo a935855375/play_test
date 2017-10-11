@@ -27,7 +27,6 @@ $(document).ready(function () {
 
     connection.onopen = function () {
         $send.prop("disabled", false);
-        $messages.prepend($("<li class='bg-info' style='font-size: 1.5em'>Connected</li>"));
         $send.on('click', send);
         $message.keypress(function (event) {
             var keycode = event.keyCode;

@@ -1,6 +1,6 @@
 package actors
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, PoisonPill, Props}
 import beans.{EnterMessage, ExitMessage, UserMessage}
 
 import scala.collection.mutable
@@ -12,7 +12,17 @@ class ServerActor extends Actor with ActorLogging {
     scala.collection.mutable.HashMap[String, (ActorRef, ActorRef)]()
 
   override def receive: PartialFunction[Any, Unit] = {
-    case EnterMessage(in, out, name) => map += ((name, (in, out)))
+    case EnterMessage(in, out, name) =>
+      if (map.contains(name)) {
+        out ! "You have connected the server, don't attempt repeatedly!"
+        out ! "If you want to receive message in this window, you have to close previous page"
+        sender() ! PoisonPill
+      }
+      else {
+        sender() ! true
+        map += ((name, (in, out)))
+        out ! "Welcome to the boring chatroom"
+      }
     case ExitMessage(name) => map -= name
     case UserMessage(name, message) => if (!message.equals("ping-pong"))
       map.foreach(x => x._2._2 ! name + "说:" + message)

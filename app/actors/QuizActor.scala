@@ -9,13 +9,16 @@ class QuizActor(out: ActorRef, val name: String) extends Actor {
 
   val actor: ActorSelection = context.actorSelection(context.system.child("ServerActor"))
 
+  var validState: Boolean = _
+
   actor ! EnterMessage(context.self, out, name)
 
   override def receive: PartialFunction[Any, Unit] = {
     case message: String => actor ! UserMessage(name, message)
+    case valid: Boolean => validState = valid
   }
 
-  override def postStop(): Unit = actor ! ExitMessage(name)
+  override def postStop(): Unit = if (validState) actor ! ExitMessage(name)
 
 }
 
