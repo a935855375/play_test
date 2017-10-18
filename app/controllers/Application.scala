@@ -14,7 +14,6 @@ import play.api.data.Forms._
 import play.api.libs.json.{JsValue, Json, OWrites}
 import play.api.libs.streams.ActorFlow
 import play.api.mvc._
-import play.libs.ws._
 import service.MailerService
 import utils.{HashUtil, VerifyCodeUtils}
 
@@ -26,7 +25,6 @@ case class Valid(valid: Boolean)
 class Application @Inject()(cc: MessagesControllerComponents,
                             users: UserRepository,
                             mailer: MailerService,
-                            ws: WSClient,
                             cached: Cached)
                            (implicit ec: ExecutionContext, system: ActorSystem, mat: Materializer) extends MessagesAbstractController(cc) {
 
@@ -95,16 +93,6 @@ class Application @Inject()(cc: MessagesControllerComponents,
     Future.successful(Ok(views.html.chatroom.register()))
   }
 
-  def doRegister(): Action[AnyContent] = Action.async { implicit request =>
-    userForm.bindFromRequest().fold(
-      _ => Future.successful(BadRequest),
-      user => users.insert(user).flatMap {
-        case x: Int if x != 0 => Future.successful(Redirect(routes.Application.echo()).withSession("username" -> user.username))
-        case _ => Future.successful(Ok("恭喜你注册失败了"))
-      }
-    )
-  }
-
   def mailTest: Action[AnyContent] = Action.async { implicit request =>
     Future {
       mailer.sendEmail("笨蛋", "1060238139@qq.com", views.html.mail.activeMail("笨蛋", "1234").body)
@@ -114,8 +102,18 @@ class Application @Inject()(cc: MessagesControllerComponents,
 
   def notFound(all: String): EssentialAction = cached("notFound") {
     Action.async { implicit request =>
-      Future.successful(Ok("Oops..there are nothing in this page.."))
+      Future.successful(Ok("Oops..there are nothing in this page..asdassad"))
     }
+  }
+
+  def doRegister(): Action[AnyContent] = Action.async { implicit request =>
+    userForm.bindFromRequest().fold(
+      _ => Future.successful(BadRequest),
+      user => users.insert(user).flatMap {
+        case x: Int if x != 0 => Future.successful(Redirect(routes.Application.echo()).withSession("username" -> user.username))
+        case _ => Future.successful(Ok("恭喜你注册失败了"))
+      }
+    )
   }
 
   def socket: WebSocket = WebSocket.acceptOrResult[String, String] { implicit request =>
@@ -147,6 +145,10 @@ class Application @Inject()(cc: MessagesControllerComponents,
 
   def exit: Action[AnyContent] = Action.async { implicit request =>
     Future.successful(Redirect(routes.Application.login()).removingFromSession("username"))
+  }
+
+  def test: Action[AnyContent] = Action.async {
+    Future.successful(Ok("Hallo from a Scala controller!The service says: 'someValue'"))
   }
 
 }

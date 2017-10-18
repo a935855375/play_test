@@ -10,6 +10,10 @@ GET         /verifyCode                  controllers.Application.verifyCode
 # Login page
 GET         /login                       controllers.Application.login
 
+GET         /test                        controllers.Application.test
+
+GET         /ws                          controllers.Application.WS
+
 # Handing login action
 POST        /login                       controllers.Application.doLogin
 
